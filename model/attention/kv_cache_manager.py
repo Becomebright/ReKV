@@ -169,7 +169,7 @@ class VectorTensor:
     def get_data(self):
         return self.data[:self.length, ...]
 
-    def get_cosine_similarity(self, tensor: torch.Tensor):
+    def get_dot_product_similarity(self, tensor: torch.Tensor):
         assert tensor.dim() == 1 and tensor.size(0) == self.hidden_size, f'{tensor.size(0)}, {self.hidden_size}'
         key = self.data[:self.length].float()  # (T, D), convert to fp32 to prevent numerical overflow
         query = tensor[None, :].float()  # (1, D)
@@ -445,7 +445,7 @@ class ContextManager:
             else:  # The local window is already filled, but the number of input frames is less than 'topk'.
                 ret = [list(range(len(self.global_blocks[0]))) for _ in range(self.num_units)]
         else:
-            logits = torch.stack([self.block_k[u].get_cosine_similarity(global_h_q[u]) for u in range(self.num_units)])  # (batch_size, block_num)
+            logits = torch.stack([self.block_k[u].get_dot_product_similarity(global_h_q[u]) for u in range(self.num_units)])  # (batch_size, block_num)
 
         if logits is not None:
             self.similarity = logits
